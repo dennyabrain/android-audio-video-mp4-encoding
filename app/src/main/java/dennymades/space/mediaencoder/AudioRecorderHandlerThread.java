@@ -1,5 +1,6 @@
 package dennymades.space.mediaencoder;
 
+import android.media.AudioRecord;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -22,15 +23,18 @@ public class AudioRecorderHandlerThread extends HandlerThread implements Handler
     private static final int MSG_RECORDING_START = 100;
     private static final int MSG_RECORDING_STOP = 101;
 
-    private boolean isRecording = true;
+    /* AudioRecord object to record audio from microphone input */
+    private AudioRecorder audioRecord;
 
 
     public AudioRecorderHandlerThread(String name) {
         super(name);
+        audioRecord = new AudioRecorder();
     }
 
     public AudioRecorderHandlerThread(String name, int priority) {
         super(name, priority);
+        audioRecord = new AudioRecorder();
     }
 
     public void setCallback(Handler cb){
@@ -49,27 +53,25 @@ public class AudioRecorderHandlerThread extends HandlerThread implements Handler
             case MSG_RECORDING_START:
                 Log.d(TAG,  "recording start message received");
                 mCallback.sendMessage(Message.obtain(null, Messages.MSG_RECORDING_START_CALLBACK));
-                while(isRecording){
-                    Log.d(TAG, "sleep tick");
-                }
+                audioRecord.startRecording();
                 break;
             case MSG_RECORDING_STOP:
                 Log.d(TAG,  "recording stop message received");
                 mCallback.sendMessage(Message.obtain(null, Messages.MSG_RECORDING_STOP_CALLBACK));
+                audioRecord.stopRecording();
                 break;
         }
         return true;
     }
 
     public void startRecording(){
-        isRecording=true;
         Message msg = Message.obtain(null, MSG_RECORDING_START);
         mHandler.sendMessage(msg);
     }
 
     public void stopRecording(){
         Log.d(TAG, "here");
-        isRecording = false;
+        audioRecord.setIsRecordingFalse();
         Message msg = Message.obtain(null, MSG_RECORDING_STOP);
         mHandler.sendMessage(msg);
     }
