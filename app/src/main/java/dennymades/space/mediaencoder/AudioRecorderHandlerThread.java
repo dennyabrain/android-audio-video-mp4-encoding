@@ -22,6 +22,8 @@ public class AudioRecorderHandlerThread extends HandlerThread implements Handler
     private static final int MSG_RECORDING_START = 100;
     private static final int MSG_RECORDING_STOP = 101;
 
+    private boolean isRecording = true;
+
 
     public AudioRecorderHandlerThread(String name) {
         super(name);
@@ -47,6 +49,9 @@ public class AudioRecorderHandlerThread extends HandlerThread implements Handler
             case MSG_RECORDING_START:
                 Log.d(TAG,  "recording start message received");
                 mCallback.sendMessage(Message.obtain(null, Messages.MSG_RECORDING_START_CALLBACK));
+                while(isRecording){
+                    Log.d(TAG, "sleep tick");
+                }
                 break;
             case MSG_RECORDING_STOP:
                 Log.d(TAG,  "recording stop message received");
@@ -57,11 +62,14 @@ public class AudioRecorderHandlerThread extends HandlerThread implements Handler
     }
 
     public void startRecording(){
+        isRecording=true;
         Message msg = Message.obtain(null, MSG_RECORDING_START);
         mHandler.sendMessage(msg);
     }
 
     public void stopRecording(){
+        Log.d(TAG, "here");
+        isRecording = false;
         Message msg = Message.obtain(null, MSG_RECORDING_STOP);
         mHandler.sendMessage(msg);
     }
