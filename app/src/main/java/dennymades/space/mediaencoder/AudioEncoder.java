@@ -19,7 +19,7 @@ public class AudioEncoder {
     private static final String MIME_TYPE = "audio/mp4a-latm";
     private static final int SAMPLE_RATE = 44100;
     private static final int BIT_RATE = 64000;
-    private static final int TIMEOUT_US = 50000;
+    private static final int TIMEOUT_US = 10000;
     private MediaCodec audioEncoder;
     private MediaFormat audioFormat;
 

@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback{
     @Override
     protected void onResume() {
         super.onResume();
-        audioRecorderHandlerThread = new AudioRecorderHandlerThread("Audio Recorder Thread", Process.THREAD_PRIORITY_AUDIO);
+        audioRecorderHandlerThread = new AudioRecorderHandlerThread("Audio Recorder Thread", Process.THREAD_PRIORITY_URGENT_AUDIO);
         audioRecorderHandlerThread.setCallback(UIHandler);
         audioRecorderHandlerThread.start();
     }

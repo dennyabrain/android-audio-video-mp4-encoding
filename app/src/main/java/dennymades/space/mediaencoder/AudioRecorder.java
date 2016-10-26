@@ -61,6 +61,7 @@ public class AudioRecorder {
         int bufferReadResult;
 
         while(isRecording){
+            bytebuffer.clear();
             bufferReadResult = mAudioRecord.read(bytebuffer,SAMPLES_PER_FRAME);
 
             if(bufferReadResult==AudioRecord.ERROR_INVALID_OPERATION || bufferReadResult==AudioRecord.ERROR_BAD_VALUE){
@@ -69,12 +70,22 @@ public class AudioRecorder {
                 //Log.d(TAG, "bytes read "+bufferReadResult);
                 // todo send this byte array to an audio encoder
                 Log.d(TAG, "going to encode "+bufferReadResult);
+                bytebuffer.position(bufferReadResult);
+                bytebuffer.flip();
+                byte[] bytes = new byte[bytebuffer.remaining()];
+                bytebuffer.get(bytes);
+                String packet = new String(bytes);
+                //Log.d(TAG, packet);
+
+                bytebuffer.position(bufferReadResult);
+                bytebuffer.flip();
                 audioEncoder.encode(bytebuffer, bufferReadResult, audioEncoder.getPTSUs());
             }
         }
     }
 
     public void sendEOS(){
+        Log.d(TAG, "sending EOS");
         final ByteBuffer bytebuffer = ByteBuffer.allocateDirect(SAMPLES_PER_FRAME);
         int bufferReadResult;
 

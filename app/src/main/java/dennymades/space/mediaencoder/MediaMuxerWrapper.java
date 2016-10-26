@@ -50,6 +50,7 @@ public class MediaMuxerWrapper {
     public void muxAudio(ByteBuffer buffer, MediaCodec.BufferInfo bufferInfo){
         try{
             muxer.writeSampleData(audioTrackIndex, buffer, bufferInfo);
+            Log.d(TAG, "muxed sample of length "+buffer.remaining());
         }catch(IllegalArgumentException e){
             Log.d(TAG, "argument to writeSampleData incorrect : ",e);
         }catch(IllegalStateException e){
