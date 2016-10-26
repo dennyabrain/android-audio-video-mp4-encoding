@@ -68,6 +68,7 @@ public class AudioEncoder {
     }
 
     public void encode(ByteBuffer rawBuffer, int length, long presentationTimeUs){
+        Log.d(TAG, "presentation time"+presentationTimeUs);
         //get input buffer
         if(isEncoding){
             final ByteBuffer[] inputBuffers = audioEncoder.getInputBuffers();
@@ -117,6 +118,14 @@ public class AudioEncoder {
             Log.d(TAG, "muxer started");
         }
         if(outputBufferIndex>=0){
+            if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
+                // You shoud set output format to muxer here when you target Android4.3 or less
+                // but MediaCodec#getOutputFormat can not call here(because INFO_OUTPUT_FORMAT_CHANGED don't come yet)
+                // therefor we should expand and prepare output format from buffer data.
+                // This sample is for API>=18(>=Android 4.3), just ignore this flag here
+                Log.d(TAG, "in BUFFER_FLAG_CODEC_CONFIG");
+                bufferInfo.size = 0;
+            }
             final ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
             muxer.muxAudio(outputBuffer, bufferInfo);
             Log.d(TAG, "outputBufferIndex"+ outputBufferIndex);
@@ -124,6 +133,7 @@ public class AudioEncoder {
         }else{
             Log.d(TAG, "output buffer index less than zero");
         }
+
     }
 
     public MediaCodec getEncoder(){
