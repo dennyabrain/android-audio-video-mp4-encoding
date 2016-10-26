@@ -24,17 +24,26 @@ public class AudioRecorderHandlerThread extends HandlerThread implements Handler
     private static final int MSG_RECORDING_STOP = 101;
 
     /* AudioRecord object to record audio from microphone input */
-    private AudioRecorder audioRecord;
+    private AudioRecorder audioRecorder;
 
+    /* AudioEncoder object to take recorded ByteBuffer from the AudioRecord object*/
+    private AudioEncoder audioEncoder;
+
+    /* MediaMuxerWrapper object to add encoded data to a MediaMuxer which converts it to .mp4*/
+    private MediaMuxerWrapper mediaMuxerWrapper;
 
     public AudioRecorderHandlerThread(String name) {
         super(name);
-        audioRecord = new AudioRecorder();
+        mediaMuxerWrapper = new MediaMuxerWrapper();
+        audioEncoder = new AudioEncoder(mediaMuxerWrapper);
+        audioRecorder = new AudioRecorder(audioEncoder);
     }
 
     public AudioRecorderHandlerThread(String name, int priority) {
         super(name, priority);
-        audioRecord = new AudioRecorder();
+        mediaMuxerWrapper = new MediaMuxerWrapper();
+        audioEncoder = new AudioEncoder(mediaMuxerWrapper);
+        audioRecorder = new AudioRecorder(audioEncoder);
     }
 
     public void setCallback(Handler cb){
@@ -53,12 +62,14 @@ public class AudioRecorderHandlerThread extends HandlerThread implements Handler
             case MSG_RECORDING_START:
                 Log.d(TAG,  "recording start message received");
                 mCallback.sendMessage(Message.obtain(null, Messages.MSG_RECORDING_START_CALLBACK));
-                audioRecord.startRecording();
+                audioRecorder.start();
+                audioEncoder.start();
+                audioRecorder.record();
                 break;
             case MSG_RECORDING_STOP:
                 Log.d(TAG,  "recording stop message received");
                 mCallback.sendMessage(Message.obtain(null, Messages.MSG_RECORDING_STOP_CALLBACK));
-                audioRecord.stopRecording();
+                audioRecorder.stopRecording();
                 break;
         }
         return true;
@@ -71,7 +82,7 @@ public class AudioRecorderHandlerThread extends HandlerThread implements Handler
 
     public void stopRecording(){
         Log.d(TAG, "here");
-        audioRecord.setIsRecordingFalse();
+        audioRecorder.setIsRecordingFalse();
         Message msg = Message.obtain(null, MSG_RECORDING_STOP);
         mHandler.sendMessage(msg);
     }

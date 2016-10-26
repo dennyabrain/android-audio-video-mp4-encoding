@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.os.Process;
 
 import util.Compatibility;
 import util.Constants;
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback{
     @Override
     protected void onResume() {
         super.onResume();
-        audioRecorderHandlerThread = new AudioRecorderHandlerThread("Audio Recorder Thread");
+        audioRecorderHandlerThread = new AudioRecorderHandlerThread("Audio Recorder Thread", Process.THREAD_PRIORITY_AUDIO);
         audioRecorderHandlerThread.setCallback(UIHandler);
         audioRecorderHandlerThread.start();
     }

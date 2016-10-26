@@ -27,9 +27,12 @@ public class AudioRecorder {
 
     private AudioRecord mAudioRecord;
 
+    private AudioEncoder audioEncoder;
+
     private boolean isRecording;
 
-    public AudioRecorder(){
+    public AudioRecorder(AudioEncoder encoder){
+        audioEncoder = encoder;
         bufferSizeInBytes = AudioRecord.getMinBufferSize(SAMPLE_RATE,
                 CHANNEL_CONFIG,
                 AUDIO_FORMAT);
@@ -48,12 +51,12 @@ public class AudioRecorder {
         isRecording = false;
     }
 
-    public void startRecording(){
-        StringBuilder string = new StringBuilder();
-
+    public void start(){
         mAudioRecord.startRecording();
         isRecording = true;
+    }
 
+    public void record(){
         final ByteBuffer bytebuffer = ByteBuffer.allocateDirect(SAMPLES_PER_FRAME);
         int bufferReadResult;
 
@@ -62,19 +65,34 @@ public class AudioRecorder {
 
             if(bufferReadResult==AudioRecord.ERROR_INVALID_OPERATION || bufferReadResult==AudioRecord.ERROR_BAD_VALUE){
                 Log.d(TAG, "audio record read error");
-            }else if(bufferReadResult>0){
-                Log.d(TAG, "bytes read "+bufferReadResult);
+            }else if(bufferReadResult>=0){
+                //Log.d(TAG, "bytes read "+bufferReadResult);
+                // todo send this byte array to an audio encoder
+                Log.d(TAG, "going to encode "+bufferReadResult);
+                audioEncoder.encode(bytebuffer, bufferReadResult, audioEncoder.getPTSUs());
             }
-            // todo send this byte array to an audio encoder
         }
+    }
+
+    public void sendEOS(){
+        final ByteBuffer bytebuffer = ByteBuffer.allocateDirect(SAMPLES_PER_FRAME);
+        int bufferReadResult;
+
+        bufferReadResult = mAudioRecord.read(bytebuffer,SAMPLES_PER_FRAME);
+        audioEncoder.encode(bytebuffer, 0, audioEncoder.getPTSUs());
     }
 
     public void stopRecording(){
         mAudioRecord.stop();
         mAudioRecord.release();
+        sendEOS();
+        audioEncoder.stop();
+        //possibly send an EOS to encoder.
     }
 
     public void setIsRecordingFalse(){
         isRecording = false;
     }
+
+
 }
